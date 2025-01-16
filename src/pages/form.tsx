@@ -27,7 +27,7 @@ interface Question {
   idQuestion: string;
   questionName: string;
   choice: {
-    idChoice: number;
+    idChoice: string;
     isCorrect: boolean;
     description: string;
   }[];
@@ -41,12 +41,12 @@ const initValue: Questionnaire = {
       questionName: "",
       choice: [
         {
-          idChoice: 1,
+          idChoice: uuid(),
           isCorrect: true,
           description: "",
         },
         {
-          idChoice: 2,
+          idChoice: uuid(),
           isCorrect: false,
           description: "",
         },
@@ -65,7 +65,7 @@ const schema = z.object({
         .min(1, { message: "Please fill in this option" }),
       choice: z.array(
         z.object({
-          idChoice: z.number(),
+          idChoice: z.string(),
           isCorrect: z.boolean(),
           description: z.string().min(1, { message: "Please fill in this option" }),
         })
@@ -96,7 +96,7 @@ export default function Form() {
   
   const handleDescriptionTextChange = (
     questionId: string,
-    choiceId: number,
+    choiceId: string,
     value: string
   ) => {
     const ques1 = form.question.map((q) => {
@@ -160,8 +160,8 @@ export default function Form() {
       idQuestion: uuid(),
       questionName: "",
       choice: [
-        { idChoice: 1, isCorrect: true, description: "" },
-        { idChoice: 2, isCorrect: false, description: "" },
+        { idChoice: uuid(), isCorrect: true, description: "" },
+        { idChoice: uuid(), isCorrect: false, description: "" },
       ],
     };
     setForm({
@@ -180,7 +180,7 @@ export default function Form() {
               choice: [
                 ...q.choice,
                 {
-                  idChoice: q.choice.length + 1,
+                  idChoice: String(q.choice.length + 1) ,
                   isCorrect: false,
                   description: "",
                 },
@@ -198,7 +198,7 @@ export default function Form() {
     });
   };
 
-  const handleChoiceChange = (idQuestion: string, choiceId: number) => {
+  const handleChoiceChange = (idQuestion: string, choiceId: string) => {
     setForm({
       ...form,
       question: form.question.map((q) =>
@@ -215,7 +215,7 @@ export default function Form() {
     });
   };
 
-  const deleteChoice = (idQuestion: string, idChoice: number) => {
+  const deleteChoice = (idQuestion: string, idChoice: string) => {
     // setForm();
     const ques = form.question.map((q) => {
       const choice = q.choice.filter((q) => {
