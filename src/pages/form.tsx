@@ -363,8 +363,7 @@ export default function Form() {
                       {...register(`question.${index}.choice.${indexC}.description`)}
                       error={!!errors.question?.[index]?.choice?.[indexC]?.description}
                       helperText={
-                        errors.question?.[index]?.choice?.[indexC]?.description?.message 
-                       || (choice?.isCorrect === true ) ?'This answer is correct' : null
+                        (choice?.isCorrect === true )?'This answer is correct': errors.question?.[index]?.choice?.[indexC]?.description?.message
                       }
                       label="Description"
                       value={choice.description}
