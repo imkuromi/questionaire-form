@@ -364,7 +364,7 @@ export default function Form() {
                       error={!!errors.question?.[index]?.choice?.[indexC]?.description}
                       helperText={
                         errors.question?.[index]?.choice?.[indexC]?.description?.message 
-                       || (choice?.isCorrect === true ) ?'This answer is correct' : null
+                       && (choice?.isCorrect === true ) ?'This answer is correct' : null
                       }
                       label="Description"
                       value={choice.description}
