@@ -23,7 +23,6 @@ interface Questionnaire {
 }
 
 interface Question {
-  //ใช้บ่อยสร้างแยก
   idQuestion: string;
   questionName: string;
   choice: {
@@ -67,7 +66,9 @@ const schema = z.object({
         z.object({
           idChoice: z.string(),
           isCorrect: z.boolean(),
-          description: z.string().min(1, { message: "Please fill in this option" }),
+          description: z
+            .string()
+            .min(1, { message: "Please fill in this option" }),
         })
       ),
     })
@@ -91,50 +92,26 @@ export default function Form() {
 
   const [form, setForm] = useState<Questionnaire>(initValue);
 
-  console.log(form, "form");
-
-  
   const handleDescriptionTextChange = (
     questionId: string,
     choiceId: string,
     value: string
-  ) => {
-    const ques1 = form.question.map((q) => {
-      const choice2 = q.choice.map((choice) => {
-        console.log("choice :", choice);
-        console.log("choice.idChoice  : ", choice.idChoice);
-        console.log("choiceId : ", choiceId);
-        console.log("index === choiceId", choice.idChoice === choiceId);
-        return choice.idChoice === choiceId
-          ? { ...choice, description: value }
-          : choice;
-      });
-      return q.idQuestion === questionId
-        ? {
-            ...q,
-            choice: choice2,
-          }
-        : q;
+  ) =>
+    setForm({
+      ...form,
+      question: form.question.map((q) =>
+        q.idQuestion === questionId
+          ? {
+              ...q,
+              choice: q.choice.map((choice) =>
+                choice.idChoice === choiceId
+                  ? { ...choice, description: value }
+                  : choice
+              ),
+            }
+          : q
+      ),
     });
-
-    setForm({ ...form, question: ques1 });
-  };
-  // setForm({
-  //   ...form,
-  //   question: form.question.map((q) =>
-  //     q.idQuestion === questionId
-  //       ? {
-  //           ...q,
-  //           question: q.choice.map((choice, index) =>
-  //             index === choiceId ?  ? { ...choice,
-  //        description: value ,
-  //       }
-  //       : choice;
-  //           ),
-  //         }
-  //       : q
-  //   ),
-  // });
 
   const handleQuestionTextChange = (questionId: string, value: string) => {
     setForm({
@@ -180,7 +157,7 @@ export default function Form() {
               choice: [
                 ...q.choice,
                 {
-                  idChoice: String(q.choice.length + 1) ,
+                  idChoice: String(q.choice.length + 1),
                   isCorrect: false,
                   description: "",
                 },
@@ -216,24 +193,17 @@ export default function Form() {
   };
 
   const deleteChoice = (idQuestion: string, idChoice: string) => {
-    // setForm();
-    const ques = form.question.map((q) => {
-      const choice = q.choice.filter((q) => {
-        // console.log(q.idChoice, 'q.idChoice')
-        // console.log(idChoice, 'idChoice')
-        // console.log(q.idChoice !== idChoice, 'q.idChoice !== idChoice')
-        return q.idChoice !== idChoice;
-      });
-      // const choice = q.choice
-      console.log(choice, "choice");
-      return q.idQuestion === idQuestion
-        ? {
-            ...q,
-            choice: choice,
-          }
-        : q;
+    setForm({
+      ...form,
+      question: form.question.map((q) =>
+        q.idQuestion === idQuestion
+          ? {
+              ...q,
+              choice: q.choice.filter((q) => q.idChoice !== idChoice),
+            }
+          : q
+      ),
     });
-    setForm({ ...form, question: ques });
   };
 
   return (
@@ -246,7 +216,10 @@ export default function Form() {
       >
         <Button
           variant="outlined"
-          onClick={() => {reset(initValue);setForm(initValue);}}
+          onClick={() => {
+            reset(initValue);
+            setForm(initValue);
+          }}
           sx={{
             borderColor: "#FF5C00",
             color: "#FF5C00",
@@ -327,7 +300,6 @@ export default function Form() {
                 onChange={(e) =>
                   handleQuestionTextChange(question.idQuestion, e.target.value)
                 }
-                
               />
               {question.choice.map((choice, indexC: number) => (
                 <Grid
@@ -360,10 +332,19 @@ export default function Form() {
                     <TextField
                       fullWidth
                       required
-                      {...register(`question.${index}.choice.${indexC}.description`)}
-                      error={!!errors.question?.[index]?.choice?.[indexC]?.description}
+                      {...register(
+                        `question.${index}.choice.${indexC}.description`
+                      )}
+                      error={
+                        !!errors.question?.[index]?.choice?.[indexC]
+                          ?.description &&
+                        !(choice.isCorrect && !choice.description)
+                      }
                       helperText={
-                        (choice?.isCorrect === true )?'This answer is correct': errors.question?.[index]?.choice?.[indexC]?.description?.message
+                        choice?.isCorrect === true && !choice?.description
+                          ? "This answer is correct"
+                          : errors.question?.[index]?.choice?.[indexC]
+                              ?.description?.message
                       }
                       label="Description"
                       value={choice.description}
