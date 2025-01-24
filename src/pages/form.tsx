@@ -1,4 +1,4 @@
-import * as React from "react";
+import React,{useState} from "react";
 import Grid from "@mui/material/Grid2";
 import {
   Box,
@@ -8,13 +8,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import AddIcon from "@mui/icons-material/Add";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { useState } from "react";
+import { DeleteOutline, Add, ContentCopy } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Schema, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 interface Questionnaire {
@@ -378,7 +375,7 @@ export default function Form() {
                         },
                       }}
                     >
-                      <DeleteOutlineIcon />
+                      <DeleteOutline />
                     </Button>
                   </Grid>
                 </Grid>
@@ -393,7 +390,7 @@ export default function Form() {
                     gap: 2,
                   }}
                 >
-                  <AddIcon />
+                  <Add />
                   <Typography>add choice</Typography>
                 </Button>
               </Box>
@@ -414,7 +411,7 @@ export default function Form() {
                   }}
                   onClick={() => copyQuestion(question.idQuestion)}
                 >
-                  <ContentCopyIcon /> &nbsp; Duplicate
+                  <ContentCopy /> &nbsp; Duplicate
                 </Button>
                 <Button
                   onClick={() => deleteQuestion(question.idQuestion)}
@@ -426,7 +423,7 @@ export default function Form() {
                     },
                   }}
                 >
-                  <DeleteOutlineIcon />
+                  <DeleteOutline />
                   &nbsp; Delete
                 </Button>
               </Box>
@@ -450,7 +447,7 @@ export default function Form() {
                 marginLeft: "1.7rem",
               }}
             >
-              <AddIcon /> &nbsp; add Question
+              <Add /> &nbsp; add Question
             </Button>
           </Box>
         </Box>
