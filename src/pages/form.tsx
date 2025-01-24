@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import Grid from "@mui/material/Grid2";
 import {
   Box,
@@ -8,24 +8,21 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import AddIcon from "@mui/icons-material/Add";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { useState } from "react";
+import { DeleteOutline, Add, ContentCopy } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Schema, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 interface Questionnaire {
   name: string;
-  question: Question[];
+  questions: Question[];
 }
 
 interface Question {
   idQuestion: string;
   questionName: string;
-  choice: {
+  choices: {
     idChoice: string;
     isCorrect: boolean;
     description: string;
@@ -34,11 +31,11 @@ interface Question {
 
 const initValue: Questionnaire = {
   name: "",
-  question: [
+  questions: [
     {
       idQuestion: uuid(),
       questionName: "",
-      choice: [
+      choices: [
         {
           idChoice: uuid(),
           isCorrect: true,
@@ -56,13 +53,13 @@ const initValue: Questionnaire = {
 
 const schema = z.object({
   name: z.string().min(1, { message: "Please fill in this option" }),
-  question: z.array(
+  questions: z.array(
     z.object({
-      idQuestion: z.number(),
+      idQuestion: z.string(),
       questionName: z
         .string()
         .min(1, { message: "Please fill in this option" }),
-      choice: z.array(
+      choices: z.array(
         z.object({
           idChoice: z.string(),
           isCorrect: z.boolean(),
@@ -99,11 +96,11 @@ export default function Form() {
   ) =>
     setForm({
       ...form,
-      question: form.question.map((q) =>
+      questions: form.questions.map((q) =>
         q.idQuestion === questionId
           ? {
               ...q,
-              choice: q.choice.map((choice) =>
+              choices: q.choices.map((choice) =>
                 choice.idChoice === choiceId
                   ? { ...choice, description: value }
                   : choice
@@ -116,7 +113,7 @@ export default function Form() {
   const handleQuestionTextChange = (questionId: string, value: string) => {
     setForm({
       ...form,
-      question: form.question.map((q) =>
+      questions: form.questions.map((q) =>
         q.idQuestion === questionId ? { ...q, questionName: value } : q
       ),
     });
@@ -124,40 +121,40 @@ export default function Form() {
 
   const copyQuestion = (questionId: string) => {
     const copiedQuestion = {
-      ...form.question.find((q) => q.idQuestion === questionId),
+      ...form.questions.find((q) => q.idQuestion === questionId),
     } as Question;
 
     copiedQuestion.idQuestion = uuid();
 
-    setForm({ ...form, question: [...form.question, copiedQuestion] });
+    setForm({ ...form, questions: [...form.questions, copiedQuestion] });
   };
 
   const addQuestion = () => {
     const newQuestion = {
       idQuestion: uuid(),
       questionName: "",
-      choice: [
+      choices: [
         { idChoice: uuid(), isCorrect: true, description: "" },
         { idChoice: uuid(), isCorrect: false, description: "" },
       ],
     };
     setForm({
       ...form,
-      question: [...form.question, newQuestion],
+      questions: [...form.questions, newQuestion],
     });
   };
 
   const addChoice = (idQuestion: string) => {
     setForm({
       ...form,
-      question: form.question.map((q) =>
+      questions: form.questions.map((q) =>
         q.idQuestion === idQuestion
           ? {
               ...q,
-              choice: [
-                ...q.choice,
+              choices: [
+                ...q.choices,
                 {
-                  idChoice: String(q.choice.length + 1),
+                  idChoice: String(q.choices.length + 1),
                   isCorrect: false,
                   description: "",
                 },
@@ -171,18 +168,18 @@ export default function Form() {
   const deleteQuestion = (idQuestion: string) => {
     setForm({
       ...form,
-      question: form.question.filter((q) => q.idQuestion !== idQuestion),
+      questions: form.questions.filter((q) => q.idQuestion !== idQuestion),
     });
   };
 
   const handleChoiceChange = (idQuestion: string, choiceId: string) => {
     setForm({
       ...form,
-      question: form.question.map((q) =>
+      questions: form.questions.map((q) =>
         q.idQuestion === idQuestion
           ? {
               ...q,
-              choice: q.choice.map((choice) => ({
+              choices: q.choices.map((choice) => ({
                 ...choice,
                 isCorrect: choice.idChoice === choiceId,
               })),
@@ -195,11 +192,11 @@ export default function Form() {
   const deleteChoice = (idQuestion: string, idChoice: string) => {
     setForm({
       ...form,
-      question: form.question.map((q) =>
+      questions: form.questions.map((q) =>
         q.idQuestion === idQuestion
           ? {
               ...q,
-              choice: q.choice.filter((q) => q.idChoice !== idChoice),
+              choices: q.choices.filter((q) => q.idChoice !== idChoice),
             }
           : q
       ),
@@ -275,7 +272,7 @@ export default function Form() {
             />
           </Box>
 
-          {form.question.map((question, index) => (
+          {form.questions.map((question, index) => (
             <Box
               key={question.idQuestion}
               sx={{
@@ -292,16 +289,16 @@ export default function Form() {
               <TextField
                 fullWidth
                 required
-                {...register(`question.${index}.questionName`)}
-                error={!!errors.question?.[index]?.questionName}
-                helperText={errors.question?.[index]?.questionName?.message}
+                {...register(`questions.${index}.questionName`)}
+                error={!!errors.questions?.[index]?.questionName}
+                helperText={errors.questions?.[index]?.questionName?.message}
                 label="Question"
                 value={question.questionName}
                 onChange={(e) =>
                   handleQuestionTextChange(question.idQuestion, e.target.value)
                 }
               />
-              {question.choice.map((choice, indexC: number) => (
+              {question.choices.map((choice, indexC: number) => (
                 <Grid
                   container
                   justifyContent={"center"}
@@ -333,17 +330,17 @@ export default function Form() {
                       fullWidth
                       required
                       {...register(
-                        `question.${index}.choice.${indexC}.description`
+                        `questions.${index}.choices.${indexC}.description`
                       )}
                       error={
-                        !!errors.question?.[index]?.choice?.[indexC]
+                        !!errors.questions?.[index]?.choices?.[indexC]
                           ?.description &&
                         !(choice.isCorrect && !choice.description)
                       }
                       helperText={
                         choice?.isCorrect === true && !choice?.description
                           ? "This answer is correct"
-                          : errors.question?.[index]?.choice?.[indexC]
+                          : errors.questions?.[index]?.choices?.[indexC]
                               ?.description?.message
                       }
                       label="Description"
@@ -378,7 +375,7 @@ export default function Form() {
                         },
                       }}
                     >
-                      <DeleteOutlineIcon />
+                      <DeleteOutline />
                     </Button>
                   </Grid>
                 </Grid>
@@ -393,7 +390,7 @@ export default function Form() {
                     gap: 2,
                   }}
                 >
-                  <AddIcon />
+                  <Add />
                   <Typography>add choice</Typography>
                 </Button>
               </Box>
@@ -414,7 +411,7 @@ export default function Form() {
                   }}
                   onClick={() => copyQuestion(question.idQuestion)}
                 >
-                  <ContentCopyIcon /> &nbsp; Duplicate
+                  <ContentCopy /> &nbsp; Duplicate
                 </Button>
                 <Button
                   onClick={() => deleteQuestion(question.idQuestion)}
@@ -426,7 +423,7 @@ export default function Form() {
                     },
                   }}
                 >
-                  <DeleteOutlineIcon />
+                  <DeleteOutline />
                   &nbsp; Delete
                 </Button>
               </Box>
@@ -450,7 +447,7 @@ export default function Form() {
                 marginLeft: "1.7rem",
               }}
             >
-              <AddIcon /> &nbsp; add Question
+              <Add /> &nbsp; add Question
             </Button>
           </Box>
         </Box>
