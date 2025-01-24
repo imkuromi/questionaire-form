@@ -4,12 +4,9 @@ import Form from "./form";
 import Navbar from "./navbar";
 import "@fontsource/prompt";
 
-
-const theme = createTheme ({
+const theme = createTheme({
   typography: {
-    fontFamily: [
-      'Prompt',
-    ].join(','),
+    fontFamily: ["Prompt"].join(","),
     h1: {
       fontSize: "4rem",
       fontWeight: 700,
@@ -17,14 +14,11 @@ const theme = createTheme ({
   },
 });
 
-
 export default function Home() {
   return (
-    <>
-<ThemeProvider theme={theme}>
-    <Navbar/>
-    <Form/>
+    <ThemeProvider theme={theme}>
+      <Navbar />
+      <Form />
     </ThemeProvider>
-    </>
   );
 }
