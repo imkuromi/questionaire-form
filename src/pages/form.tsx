@@ -11,7 +11,7 @@ import {
 import { DeleteOutline, Add, ContentCopy } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Schema, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 interface Questionnaire {
@@ -390,7 +390,7 @@ export default function Form() {
                     gap: 2,
                   }}
                 >
-                  <Add/>
+                  <Add />
                   <Typography>add choice</Typography>
                 </Button>
               </Box>
