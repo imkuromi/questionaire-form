@@ -147,7 +147,7 @@ export default function Form() {
           choices: [
             ...q.choices,
             {
-              idChoice: String(q.choices.length + 1),
+              idChoice: uuid(),
               isCorrect: false,
               description: "",
             },
