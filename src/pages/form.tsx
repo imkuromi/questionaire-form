@@ -93,30 +93,28 @@ export default function Form() {
     questionId: string,
     choiceId: string,
     value: string
-  ) =>
-    setForm({
-      ...form,
-      questions: form.questions.map((q) =>
-        q.idQuestion === questionId
-          ? {
-              ...q,
-              choices: q.choices.map((choice) =>
-                choice.idChoice === choiceId
-                  ? { ...choice, description: value }
-                  : choice
-              ),
-            }
-          : q
-      ),
+  ) => {
+    const question = form.questions.map((q) => {
+      const choice = q.choices.map((choice) => {
+        return choice.idChoice === choiceId
+          ? { ...choice, description: value }
+          : choice;
+      });
+      return q.idQuestion === questionId
+        ? {
+          ...q,
+          choices: choice,
+        }
+        : q;
     });
+    setForm({ ...form, questions: question });
+  };
 
   const handleQuestionTextChange = (questionId: string, value: string) => {
-    setForm({
-      ...form,
-      questions: form.questions.map((q) =>
-        q.idQuestion === questionId ? { ...q, questionName: value } : q
-      ),
+    const question = form.questions.map((q) => {
+      return q.idQuestion === questionId ? { ...q, questionName: value } : q;
     });
+    setForm({ ...form, questions: question });
   };
 
   const copyQuestion = (questionId: string) => {
@@ -138,69 +136,61 @@ export default function Form() {
         { idChoice: uuid(), isCorrect: false, description: "" },
       ],
     };
-    setForm({
-      ...form,
-      questions: [...form.questions, newQuestion],
-    });
+    setForm({ ...form, questions: [...form.questions, newQuestion] });
   };
 
   const addChoice = (idQuestion: string) => {
-    setForm({
-      ...form,
-      questions: form.questions.map((q) =>
-        q.idQuestion === idQuestion
-          ? {
-              ...q,
-              choices: [
-                ...q.choices,
-                {
-                  idChoice: String(q.choices.length + 1),
-                  isCorrect: false,
-                  description: "",
-                },
-              ],
-            }
-          : q
-      ),
+    const question = form.questions.map((q) => {
+      return q.idQuestion === idQuestion
+        ? {
+          ...q,
+          choices: [
+            ...q.choices,
+            {
+              idChoice: String(q.choices.length + 1),
+              isCorrect: false,
+              description: "",
+            },
+          ],
+        }
+        : q;
     });
+    setForm({ ...form, questions: question });
   };
 
   const deleteQuestion = (idQuestion: string) => {
+    const question = form.questions.filter((q) => q.idQuestion !== idQuestion);
     setForm({
       ...form,
-      questions: form.questions.filter((q) => q.idQuestion !== idQuestion),
+      questions: question,
     });
   };
 
   const handleChoiceChange = (idQuestion: string, choiceId: string) => {
-    setForm({
-      ...form,
-      questions: form.questions.map((q) =>
-        q.idQuestion === idQuestion
-          ? {
-              ...q,
-              choices: q.choices.map((choice) => ({
-                ...choice,
-                isCorrect: choice.idChoice === choiceId,
-              })),
-            }
-          : q
-      ),
-    });
+    const question = form.questions.map((q) =>
+      q.idQuestion === idQuestion
+        ? {
+          ...q,
+          choices: q.choices.map((c) => ({
+            ...c,
+            isCorrect: c.idChoice === choiceId,
+          })),
+        }
+        : q
+    );
+    setForm({ ...form, questions: question });
   };
 
   const deleteChoice = (idQuestion: string, idChoice: string) => {
-    setForm({
-      ...form,
-      questions: form.questions.map((q) =>
-        q.idQuestion === idQuestion
-          ? {
-              ...q,
-              choices: q.choices.filter((q) => q.idChoice !== idChoice),
-            }
-          : q
-      ),
+    const choice = form.questions.map((q) => {
+      return q.idQuestion === idQuestion
+        ? {
+          ...q,
+          choices: q.choices.filter((q) => q.idChoice !== idChoice),
+        }
+        : q;
     });
+    setForm({ ...form, questions: choice });
   };
 
   return (
@@ -341,7 +331,7 @@ export default function Form() {
                         choice?.isCorrect === true && !choice?.description
                           ? "This answer is correct"
                           : errors.questions?.[index]?.choices?.[indexC]
-                              ?.description?.message
+                            ?.description?.message
                       }
                       label="Description"
                       value={choice.description}
