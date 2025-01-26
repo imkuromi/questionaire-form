@@ -102,9 +102,9 @@ export default function Form() {
       });
       return q.idQuestion === questionId
         ? {
-            ...q,
-            choices: choice,
-          }
+          ...q,
+          choices: choice,
+        }
         : q;
     });
     setForm({ ...form, questions: question });
@@ -143,16 +143,16 @@ export default function Form() {
     const question = form.questions.map((q) => {
       return q.idQuestion === idQuestion
         ? {
-            ...q,
-            choices: [
-              ...q.choices,
-              {
-                idChoice: String(q.choices.length + 1),
-                isCorrect: false,
-                description: "",
-              },
-            ],
-          }
+          ...q,
+          choices: [
+            ...q.choices,
+            {
+              idChoice: String(q.choices.length + 1),
+              isCorrect: false,
+              description: "",
+            },
+          ],
+        }
         : q;
     });
     setForm({ ...form, questions: question });
@@ -170,12 +170,12 @@ export default function Form() {
     const question = form.questions.map((q) =>
       q.idQuestion === idQuestion
         ? {
-            ...q,
-            choices: q.choices.map((c) => ({
-              ...c,
-              isCorrect: c.idChoice === choiceId,
-            })),
-          }
+          ...q,
+          choices: q.choices.map((c) => ({
+            ...c,
+            isCorrect: c.idChoice === choiceId,
+          })),
+        }
         : q
     );
     setForm({ ...form, questions: question });
@@ -185,9 +185,9 @@ export default function Form() {
     const choice = form.questions.map((q) => {
       return q.idQuestion === idQuestion
         ? {
-            ...q,
-            choices: q.choices.filter((q) => q.idChoice !== idChoice),
-          }
+          ...q,
+          choices: q.choices.filter((q) => q.idChoice !== idChoice),
+        }
         : q;
     });
     setForm({ ...form, questions: choice });
@@ -331,7 +331,7 @@ export default function Form() {
                         choice?.isCorrect === true && !choice?.description
                           ? "This answer is correct"
                           : errors.questions?.[index]?.choices?.[indexC]
-                              ?.description?.message
+                            ?.description?.message
                       }
                       label="Description"
                       value={choice.description}
