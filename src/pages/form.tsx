@@ -324,9 +324,7 @@ export default function Form() {
                       )}
                       error={
                         !!errors.questions?.[index]?.choices?.[indexC]
-                          ?.description &&
-                        !(choice.isCorrect && !choice.description)
-                      }
+                          ?.description}
                       helperText={
                         choice?.isCorrect === true && !choice?.description
                           ? "This answer is correct"
