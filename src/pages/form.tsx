@@ -102,9 +102,9 @@ export default function Form() {
       });
       return q.idQuestion === questionId
         ? {
-          ...q,
-          choices: choice,
-        }
+            ...q,
+            choices: choice,
+          }
         : q;
     });
     setForm({ ...form, questions: question });
@@ -143,16 +143,16 @@ export default function Form() {
     const question = form.questions.map((q) => {
       return q.idQuestion === idQuestion
         ? {
-          ...q,
-          choices: [
-            ...q.choices,
-            {
-              idChoice: uuid(),
-              isCorrect: false,
-              description: "",
-            },
-          ],
-        }
+            ...q,
+            choices: [
+              ...q.choices,
+              {
+                idChoice: uuid(),
+                isCorrect: false,
+                description: "",
+              },
+            ],
+          }
         : q;
     });
     setForm({ ...form, questions: question });
@@ -170,27 +170,30 @@ export default function Form() {
     const question = form.questions.map((q) =>
       q.idQuestion === idQuestion
         ? {
-          ...q,
-          choices: q.choices.map((c) => ({
-            ...c,
-            isCorrect: c.idChoice === choiceId,
-          })),
-        }
+            ...q,
+            choices: q.choices.map((c) => ({
+              ...c,
+              isCorrect: c.idChoice === choiceId,
+            })),
+          }
         : q
     );
     setForm({ ...form, questions: question });
   };
 
   const deleteChoice = (idQuestion: string, idChoice: string) => {
-    const choice = form.questions.map((q) => {
-      return q.idQuestion === idQuestion
-        ? {
-          ...q,
-          choices: q.choices.filter((q) => q.idChoice !== idChoice),
+    const question = form.questions.map((q) => {
+      if (q.idQuestion === idQuestion) {
+        const choice = q.choices.filter((q) => q.idChoice !== idChoice);
+        if (choice.length > 0) {
+          choice[0].isCorrect = true;
         }
-        : q;
+        return { ...q, choices: choice };
+      }
+      return q;
     });
-    setForm({ ...form, questions: choice });
+
+    setForm({ ...form, questions: question });
   };
 
   return (
@@ -254,7 +257,7 @@ export default function Form() {
               fullWidth
               required
               {...register("name")}
-              error={!!errors.name}
+              error={!!errors.name && form.name === ""}
               helperText={errors.name?.message}
               label="Name"
               value={form?.name}
@@ -280,7 +283,10 @@ export default function Form() {
                 fullWidth
                 required
                 {...register(`questions.${index}.questionName`)}
-                error={!!errors.questions?.[index]?.questionName}
+                error={
+                  !!errors.questions?.[index]?.questionName &&
+                  question.questionName === ""
+                }
                 helperText={errors.questions?.[index]?.questionName?.message}
                 label="Question"
                 value={question.questionName}
@@ -291,7 +297,7 @@ export default function Form() {
               {question.choices.map((choice, indexC: number) => (
                 <Grid
                   container
-                  justifyContent={"center"}
+                  justifyContent={"start"}
                   alignContent={"center"}
                   marginTop={"1rem"}
                   size={12}
@@ -324,12 +330,13 @@ export default function Form() {
                       )}
                       error={
                         !!errors.questions?.[index]?.choices?.[indexC]
-                          ?.description}
+                          ?.description && choice.description === ""
+                      }
                       helperText={
-                        choice?.isCorrect === true && !choice?.description
+                        choice?.isCorrect === true
                           ? "This answer is correct"
                           : errors.questions?.[index]?.choices?.[indexC]
-                            ?.description?.message
+                              ?.description?.message
                       }
                       label="Description"
                       value={choice.description}
@@ -342,30 +349,26 @@ export default function Form() {
                       }
                     />
                   </Grid>
-
-                  <Grid
-                    container
-                    justifyContent={"center"}
-                    alignContent={"center"}
-                    size={1}
-                  >
-                    <Button
-                      onClick={() =>
-                        deleteChoice(question.idQuestion, choice.idChoice)
-                      }
-                      sx={{
-                        color: "#000",
-                        marginLeft: "1.7rem",
-                        marginY: "0.5rem",
-                        gap: 2,
-                        "&:hover": {
-                          color: "red",
-                        },
-                      }}
-                    >
-                      <DeleteOutline />
-                    </Button>
-                  </Grid>
+                  {question.choices.length > 1 && (
+                    <Grid size={1}>
+                      <Button
+                        onClick={() =>
+                          deleteChoice(question.idQuestion, choice.idChoice)
+                        }
+                        sx={{
+                          color: "#000",
+                          marginLeft: "1.7rem",
+                          marginY: "0.5rem",
+                          gap: 2,
+                          "&:hover": {
+                            color: "red",
+                          },
+                        }}
+                      >
+                        <DeleteOutline />
+                      </Button>
+                    </Grid>
+                  )}
                 </Grid>
               ))}
               <Box sx={{ borderBottom: 0.5, borderColor: "grey.300" }}>
