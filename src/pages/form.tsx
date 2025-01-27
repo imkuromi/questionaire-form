@@ -258,7 +258,7 @@ export default function Form() {
               required
               {...register("name")}
               error={!!errors.name && form.name === ""}
-              helperText={errors.name?.message}
+              helperText={form?.name === "" ? errors.name?.message : ""}
               label="Name"
               value={form?.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -287,7 +287,11 @@ export default function Form() {
                   !!errors.questions?.[index]?.questionName &&
                   question.questionName === ""
                 }
-                helperText={errors.questions?.[index]?.questionName?.message}
+                helperText={
+                  question.questionName === ""
+                    ? errors.questions?.[index]?.questionName?.message
+                    : ""
+                }
                 label="Question"
                 value={question.questionName}
                 onChange={(e) =>
@@ -335,8 +339,10 @@ export default function Form() {
                       helperText={
                         choice?.isCorrect === true
                           ? "This answer is correct"
-                          : errors.questions?.[index]?.choices?.[indexC]
+                          : choice.description === ""
+                          ? errors.questions?.[index]?.choices?.[indexC]
                               ?.description?.message
+                          : ""
                       }
                       label="Description"
                       value={choice.description}
