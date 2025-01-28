@@ -184,8 +184,8 @@ export default function Form() {
   const deleteChoice = (idQuestion: string, idChoice: string) => {
     const question = form.questions.map((q) => {
       if (q.idQuestion === idQuestion) {
-        const choice = q.choices.filter((q) => q.idChoice !== idChoice);
-        if (choice.length > 0) {
+        const choice = q.choices.filter((c) => c.idChoice !== idChoice);
+        if (!choice.some((i)=> i.isCorrect) && choice.length > 0) {
           choice[0].isCorrect = true;
         }
         return { ...q, choices: choice };
