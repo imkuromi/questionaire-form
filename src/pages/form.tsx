@@ -163,7 +163,7 @@ export default function Form() {
 
   const deleteQuestion = (idQuestion: string) => {
     const question = form.questions.filter((q) => q.idQuestion !== idQuestion);
-    console.log(question, "question111");
+
     setForm({
       ...form,
       questions: question,
@@ -199,8 +199,6 @@ export default function Form() {
 
     setForm({ ...form, questions: question });
   };
-
-  console.log("Form", form);
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)}>
@@ -263,7 +261,7 @@ export default function Form() {
               fullWidth
               required
               {...register("name")}
-              error={!!errors.name && form.name === ""}
+              error={!!errors.name}
               helperText={form?.name === "" ? errors.name?.message : ""}
               label="Name"
               value={form?.name}
