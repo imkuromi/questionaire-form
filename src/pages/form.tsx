@@ -52,20 +52,16 @@ const initValue: Questionnaire = {
 };
 
 const schema = z.object({
-  name: z.string().min(1, { message: "Please fill in this option" }),
+  name: z.string().min(1),
   questions: z.array(
     z.object({
       idQuestion: z.string(),
-      questionName: z
-        .string()
-        .min(1, { message: "Please fill in this option" }),
+      questionName: z.string().min(1),
       choices: z.array(
         z.object({
           idChoice: z.string(),
           isCorrect: z.boolean(),
-          description: z
-            .string()
-            .min(1, { message: "Please fill in this option" }),
+          description: z.string().min(1),
         })
       ),
     })
@@ -115,8 +111,6 @@ export default function Form() {
     const question = form.questions.map((q) => {
       return q.idQuestion === questionId ? { ...q, questionName: value } : q;
     });
-    console.log();
-
     setForm({ ...form, questions: question });
   };
 
@@ -163,7 +157,6 @@ export default function Form() {
 
   const deleteQuestion = (idQuestion: string) => {
     const question = form.questions.filter((q) => q.idQuestion !== idQuestion);
-
     setForm({
       ...form,
       questions: question,
@@ -177,7 +170,7 @@ export default function Form() {
             ...q,
             choices: q.choices.map((c) => ({
               ...c,
-              isCorrect: c.idChoice === choiceId,
+              isCorrect: c.idChoice === choiceId ? true : false,
             })),
           }
         : q
@@ -188,15 +181,18 @@ export default function Form() {
   const deleteChoice = (idQuestion: string, idChoice: string) => {
     const question = form.questions.map((q) => {
       if (q.idQuestion === idQuestion) {
-        const choice = q.choices.filter((q) => q.idChoice !== idChoice);
-        if (!choice.some((x) => x.isCorrect) && choice.length > 0) {
-          choice[0].isCorrect = true;
-        }
-        return { ...q, choices: choice };
+        const choice = q.choices.filter((i) => i.idChoice !== idChoice);
+        const hasCorrect = choice.some((c) => c.isCorrect);
+        const updatedChoice = hasCorrect
+          ? choice
+          : choice.map((c, index) => ({
+              ...c,
+              isCorrect: index === 0 ? true : false,
+            }));
+        return { ...q, choices: updatedChoice };
       }
       return q;
     });
-
     setForm({ ...form, questions: question });
   };
 
@@ -261,7 +257,7 @@ export default function Form() {
               fullWidth
               required
               {...register("name")}
-              error={!!errors.name}
+              error={!!errors.name && form.name === ""}
               helperText={form?.name === "" ? errors.name?.message : ""}
               label="Name"
               value={form?.name}
@@ -297,7 +293,9 @@ export default function Form() {
                     }
                     helperText={
                       question.questionName === ""
-                        ? errors.questions?.[index]?.questionName?.message
+                        ? !!errors.questions?.[index]?.questionName?.message
+                          ? "Please fill in this option"
+                          : ""
                         : ""
                     }
                     label="Question"
@@ -353,11 +351,11 @@ export default function Form() {
                               ?.description && choice.description === ""
                           }
                           helperText={
-                            choice?.isCorrect === true
+                            choice.isCorrect
                               ? "This answer is correct"
-                              : choice.description === ""
-                              ? errors.questions?.[index]?.choices?.[indexC]
-                                  ?.description?.message
+                              : !!errors.questions?.[index]?.choices?.[indexC]
+                                  ?.description && choice.description === ""
+                              ? "Please fill in this option"
                               : ""
                           }
                           label="Description"
