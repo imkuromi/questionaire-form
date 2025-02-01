@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { DeleteOutline, Add, ContentCopy } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -52,20 +52,16 @@ const initValue: Questionnaire = {
 };
 
 const schema = z.object({
-  name: z.string().min(1, { message: "Please fill in this option" }),
+  name: z.string().min(1),
   questions: z.array(
     z.object({
       idQuestion: z.string(),
-      questionName: z
-        .string()
-        .min(1, { message: "Please fill in this option" }),
+      questionName: z.string().min(1),
       choices: z.array(
         z.object({
           idChoice: z.string(),
           isCorrect: z.boolean(),
-          description: z
-            .string()
-            .min(1, { message: "Please fill in this option" }),
+          description: z.string().min(1),
         })
       ),
     })
@@ -77,6 +73,7 @@ export default function Form() {
     register,
     reset,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<Questionnaire>({
     mode: "all",
@@ -173,7 +170,7 @@ export default function Form() {
             ...q,
             choices: q.choices.map((c) => ({
               ...c,
-              isCorrect: c.idChoice === choiceId,
+              isCorrect: c.idChoice === choiceId ? true : false,
             })),
           }
         : q
@@ -184,15 +181,18 @@ export default function Form() {
   const deleteChoice = (idQuestion: string, idChoice: string) => {
     const question = form.questions.map((q) => {
       if (q.idQuestion === idQuestion) {
-        const choice = q.choices.filter((c) => c.idChoice !== idChoice);
-        if (!choice.some((i)=> i.isCorrect) && choice.length > 0) {
-          choice[0].isCorrect = true;
-        }
-        return { ...q, choices: choice };
+        const choice = q.choices.filter((i) => i.idChoice !== idChoice);
+        const hasCorrect = choice.some((c) => c.isCorrect);
+        const updatedChoice = hasCorrect
+          ? choice
+          : choice.map((c, index) => ({
+              ...c,
+              isCorrect: index === 0 ? true : false,
+            }));
+        return { ...q, choices: updatedChoice };
       }
       return q;
     });
-
     setForm({ ...form, questions: question });
   };
 
@@ -279,25 +279,37 @@ export default function Form() {
               >
                 Question {index + 1}
               </Typography>
-              <TextField
-                fullWidth
-                required
-                {...register(`questions.${index}.questionName`)}
-                error={
-                  !!errors.questions?.[index]?.questionName &&
-                  question.questionName === ""
-                }
-                helperText={
-                  question.questionName === ""
-                    ? errors.questions?.[index]?.questionName?.message
-                    : ""
-                }
-                label="Question"
-                value={question.questionName}
-                onChange={(e) =>
-                  handleQuestionTextChange(question.idQuestion, e.target.value)
-                }
+              <Controller
+                control={control}
+                name={`questions.${index}.questionName`}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    required
+                    error={
+                      !!errors.questions?.[index]?.questionName &&
+                      question.questionName === ""
+                    }
+                    helperText={
+                      question.questionName === ""
+                        ? !!errors.questions?.[index]?.questionName?.message
+                          ? "Please fill in this option"
+                          : ""
+                        : ""
+                    }
+                    label="Question"
+                    value={question.questionName}
+                    onChange={(e) =>
+                      handleQuestionTextChange(
+                        question.idQuestion,
+                        e.target.value
+                      )
+                    }
+                  />
+                )}
               />
+
               {question.choices.map((choice, indexC: number) => (
                 <Grid
                   container
@@ -326,33 +338,37 @@ export default function Form() {
                   </Grid>
 
                   <Grid size={10}>
-                    <TextField
-                      fullWidth
-                      required
-                      {...register(
-                        `questions.${index}.choices.${indexC}.description`
+                    <Controller
+                      control={control}
+                      name={`questions.${index}.choices.${indexC}.description`}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          fullWidth
+                          required
+                          error={
+                            !!errors.questions?.[index]?.choices?.[indexC]
+                              ?.description && choice.description === ""
+                          }
+                          helperText={
+                            choice.isCorrect
+                              ? "This answer is correct"
+                              : !!errors.questions?.[index]?.choices?.[indexC]
+                                  ?.description && choice.description === ""
+                              ? "Please fill in this option"
+                              : ""
+                          }
+                          label="Description"
+                          value={choice.description}
+                          onChange={(e) =>
+                            handleDescriptionTextChange(
+                              question.idQuestion,
+                              choice.idChoice,
+                              e.target.value
+                            )
+                          }
+                        />
                       )}
-                      error={
-                        !!errors.questions?.[index]?.choices?.[indexC]
-                          ?.description && choice.description === ""
-                      }
-                      helperText={
-                        choice?.isCorrect === true
-                          ? "This answer is correct"
-                          : choice.description === ""
-                          ? errors.questions?.[index]?.choices?.[indexC]
-                              ?.description?.message
-                          : ""
-                      }
-                      label="Description"
-                      value={choice.description}
-                      onChange={(e) =>
-                        handleDescriptionTextChange(
-                          question.idQuestion,
-                          choice.idChoice,
-                          e.target.value
-                        )
-                      }
                     />
                   </Grid>
                   {question.choices.length > 1 && (
